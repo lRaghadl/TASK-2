@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang='ar-AE'>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>CONVERT SPEECH TO TEXT</title>
+</head>
+<body>
+     <a href="index.html"></a>
+     <button class="btn" >CONNECT</button><br>
+</body>
+<script>
+    document.querySelector('button').addEventListener('click', async () => {
+  // Prompt user to select any serial port.
+  const port = await navigator.serial.requestPort();
+  await port.open({ baudRate: 9600 });
+
+const textDecoder = new TextDecoderStream();
+const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+const reader = textDecoder.readable.getReader();
+
+// Listen to data coming from the serial device.
+while (true) {
+  const { value, done } = await reader.read();
+  if (done) {
+    reader.releaseLock();
+    break;
+  }
+  // value is a string.
+  console.log(value);
+}
+
+const textEncoder = new TextEncoderStream();
+const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+const writer = textEncoder.writable.getWriter();
+
+await writer.write("hello");
+writer.close();
+await writableStreamClosed;
+});
+</script>
+</html>
